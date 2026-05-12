@@ -1,0 +1,93 @@
+{
+  "description": "LECS instance specifications — reference data for SC-03 create host tests",
+  "instance_specs": [
+    {
+      "id": "eco-001",
+      "name": "2vCPU+2GiB",
+      "planType": "ECONOMY",
+      "vcpu": 2,
+      "memoryGiB": 2,
+      "systemDiskGB": 40,
+      "monthlyPriceCents": 10000,
+      "label": "经济型 2vCPU+2GiB"
+    },
+    {
+      "id": "eco-002",
+      "name": "2vCPU+4GiB",
+      "planType": "ECONOMY",
+      "vcpu": 2,
+      "memoryGiB": 4,
+      "systemDiskGB": 40,
+      "monthlyPriceCents": 14000,
+      "label": "经济型 2vCPU+4GiB"
+    },
+    {
+      "id": "eco-003",
+      "name": "2vCPU+8GiB",
+      "planType": "ECONOMY",
+      "vcpu": 2,
+      "memoryGiB": 8,
+      "systemDiskGB": 40,
+      "monthlyPriceCents": 18000,
+      "label": "经济型 2vCPU+8GiB"
+    },
+    {
+      "id": "eco-004",
+      "name": "4vCPU+8GiB",
+      "planType": "ECONOMY",
+      "vcpu": 4,
+      "memoryGiB": 8,
+      "systemDiskGB": 40,
+      "monthlyPriceCents": 24000,
+      "label": "经济型 4vCPU+8GiB"
+    },
+    {
+      "id": "hp-001",
+      "name": "2vCPU+4GiB",
+      "planType": "HIGH_PERFORMANCE",
+      "vcpu": 2,
+      "memoryGiB": 4,
+      "systemDiskGB": 40,
+      "monthlyPriceCents": 16000,
+      "label": "高性能型 2vCPU+4GiB"
+    },
+    {
+      "id": "hp-002",
+      "name": "2vCPU+8GiB",
+      "planType": "HIGH_PERFORMANCE",
+      "vcpu": 2,
+      "memoryGiB": 8,
+      "systemDiskGB": 40,
+      "monthlyPriceCents": 20000,
+      "label": "高性能型 2vCPU+8GiB"
+    },
+    {
+      "id": "hp-003",
+      "name": "4vCPU+8GiB",
+      "planType": "HIGH_PERFORMANCE",
+      "vcpu": 4,
+      "memoryGiB": 8,
+      "systemDiskGB": 40,
+      "monthlyPriceCents": 26000,
+      "label": "高性能型 4vCPU+8GiB"
+    },
+    {
+      "id": "hp-004",
+      "name": "8vCPU+16GiB",
+      "planType": "HIGH_PERFORMANCE",
+      "vcpu": 8,
+      "memoryGiB": 16,
+      "systemDiskGB": 40,
+      "monthlyPriceCents": 50000,
+      "label": "高性能型 8vCPU+16GiB"
+    }
+  ],
+  "billing_formula": {
+    "PREPAID": "monthlyPriceCents * purchaseMonths",
+    "PAY_AS_YOU_GO": "monthlyPriceCents / 30 (rounded to 2 decimal places)"
+  },
+  "unit_labels": {
+    "PREPAID": "元/月",
+    "PAY_AS_YOU_GO": "元/天"
+  }
+}
