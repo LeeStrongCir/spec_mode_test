@@ -11,6 +11,23 @@
     "oauth_providers": {
       "google": {"mock_auth": true, "mock_token": "mock-oauth-google-token"},
       "github": {"mock_auth": true, "mock_token": "mock-oauth-github-token"}
+    },
+    "billing_service": {
+      "mock_enabled": true,
+      "fixed_rates": {
+        "eco-001": {"monthly_price_cents": 10000, "vcpu": 2, "memory_gib": 2},
+        "eco-002": {"monthly_price_cents": 14000, "vcpu": 2, "memory_gib": 4},
+        "eco-003": {"monthly_price_cents": 18000, "vcpu": 2, "memory_gib": 8},
+        "eco-004": {"monthly_price_cents": 24000, "vcpu": 4, "memory_gib": 8},
+        "hp-001": {"monthly_price_cents": 16000, "vcpu": 2, "memory_gib": 4},
+        "hp-002": {"monthly_price_cents": 20000, "vcpu": 2, "memory_gib": 8},
+        "hp-003": {"monthly_price_cents": 26000, "vcpu": 4, "memory_gib": 8},
+        "hp-004": {"monthly_price_cents": 50000, "vcpu": 8, "memory_gib": 16}
+      }
+    },
+    "async_task_queue": {
+      "mock_enabled": true,
+      "mock_task_id": "mock-task-uuid-001"
     }
   }
 }
