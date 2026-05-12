@@ -136,7 +136,7 @@ async def async_client():
 
 ### 并行执行策略
 
-- 集成测试可使用 pytest-xdist 并行执行（独立 DB）
+- 集成测试可使用 pytest-xdist 并行执行
 - E2E 测试串行执行（避免浏览器实例冲突）
 
 ## 项目结构
@@ -145,9 +145,9 @@ async def async_client():
 
 ```text
 specs/[###-feature]/
-├── plan.md              # 本文件（由 /speckit.plan 命令输出）
+├── plan.md              # 本文件（由 /speckit-test.plan 命令输出）
 ├── research.md          # 阶段 0 输出（技术调研）
-└── tasks.md             # 测试执行任务分解（由 /speckit.tasks 命令生成）
+└── tasks.md             # 测试执行任务分解（由 /speckit-test.tasks 命令生成）
 ```
 
 ### 测试工件结构（仓库根目录）
@@ -189,42 +189,29 @@ tests/
 
 | 组件 | 要求 | 备注 |
 |------|------|------|
-| **运行时** | [如 Python 3.11+, Node 18+] | 与生产环境保持一致 |
-| **数据库** | [如 SQLite 内存库 / PostgreSQL test container] | 每个测试独立实例 |
-| **浏览器** | [如 Chromium, Firefox] | E2E 测试需要 |
-| **依赖服务** | [如 Redis, Celery worker] | 按需启动 |
+| [例如：执行机] | [安装Python 3.11+, 以及依赖项 pytest, httpx, fakeredis, freezegun 等] | [与生产环境保持一致] |
+| [例如：执行机] | [安装Playwright chromium浏览器] | [E2E 测试需要] |
 
 ### 环境变量配置
 
 ```bash
-# .env.test - 测试环境专用配置（集成测试 + E2E 共用）
-DATABASE_URL=sqlite:///test.db
-TESTING=true
-SECRET_KEY=test-secret-key-do-not-use-in-production
-MOCK_EXTERNAL_SERVICES=true
+DATABASE_URL=database-url
 ```
 
 ### 测试配置文件
 
 | 文件 | 用途 |
 |------|------|
-| `tests/conftest.py` | 全局 fixture（DB、用户、客户端） |
-| `tests/[feature]/conftest.py` | feature 级 fixture |
-| `pytest.ini` / `pyproject.toml` | pytest 配置（标记、并行） |
+| [例如：`tests/conftest.py`] | [全局 fixture（DB、用户、客户端）] |
+| [例如：`pytest.ini` / `pyproject.toml`] | [pytest 配置（标记、并行）] |
 
 ### 测试数据准备
 
 | 数据类型 | 来源 | 刷新频率 | 清理策略 |
 |----------|------|----------|----------|
-| 基准测试数据 | [如 factory fixtures, seed scripts] | 每次测试运行前 | 事务回滚自动清理 |
-| 用户测试数据 | [如测试账号池, Factory Boy] | 按需创建 | 测试结束后自动删除 |
-| 外部服务 Mock 数据 | [如 fixtures/, responses.json] | 手动更新 | 版本控制管理 |
-
-### 环境隔离策略
-
-- **数据库隔离**: 每个测试使用独立的内存数据库或独立的 schema
-- **网络隔离**: Mock 外部服务调用，避免真实网络请求
-- **状态隔离**: 测试间不共享状态，每个测试从干净的初始状态开始
+| [例如：基准测试数据] | [如 factory fixtures, seed scripts] | [每次测试运行前] | [事务回滚自动清理] |
+| [例如：用户测试数据] | [如测试账号池, Factory Boy] | [按需自动创建] | [测试结束后自动删除] |
+| [例如：外部服务 Mock 数据] | [如 fixtures/, responses.json] | [按需自动创建] | [测试结束后自动删除] |
 
 ## 测试可追溯性
 
@@ -247,9 +234,9 @@ MOCK_EXTERNAL_SERVICES=true
 
 | 风险 | 影响 | 缓解措施 |
 |------|------|----------|
-| [如：异步操作时序不确定性] | [测试结果不确定] | [确定性等待策略，固定时间] |
-| [如：外部 API 不可用] | [集成测试失败] | [Mock 外部依赖] |
-| [如：数据库状态污染] | [测试间相互影响] | [事务回滚，独立 DB] |
+| [例如：异步操作时序不确定性] | [测试结果不确定] | [确定性等待策略，固定时间] |
+| [例如：外部 API 不可用] | [集成测试失败] | [Mock 外部依赖] |
+| [例如：数据库状态污染] | [测试间相互影响] | [事务回滚，独立 DB] |
 
 ## 复杂度追踪
 
@@ -257,5 +244,5 @@ MOCK_EXTERNAL_SERVICES=true
 
 | 违反项 | 为什么需要 | 拒绝更简单方案的理由 |
 |--------|-----------|---------------------|
-| [如：额外测试层] | [当前需求] | [为什么现有层次不够] |
-| [如：自定义测试基础设施] | [具体问题] | [为什么标准 fixture 不够] |
+| [例如：额外测试层] | [当前需求] | [为什么现有层次不够] |
+| [例如：自定义测试基础设施] | [具体问题] | [为什么标准 fixture 不够] |

@@ -1,0 +1,16 @@
+{
+  "external_services": {
+    "email_service": {
+      "mock_send": true,
+      "mock_responses": {
+        "send_verification": {"status": "success", "message_id": "mock-msg-001"},
+        "send_password_reset": {"status": "success", "message_id": "mock-msg-002"},
+        "send_failure": null
+      }
+    },
+    "oauth_providers": {
+      "google": {"mock_auth": true, "mock_token": "mock-oauth-google-token"},
+      "github": {"mock_auth": true, "mock_token": "mock-oauth-github-token"}
+    }
+  }
+}

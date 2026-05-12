@@ -1,0 +1,27 @@
+{
+  "test_accounts": [
+    {
+      "role": "standard_user",
+      "username": "testuser",
+      "password": "Test@1234",
+      "email": "testuser@example.com",
+      "status": "active"
+    },
+    {
+      "role": "locked_user",
+      "username": "lockeduser",
+      "password": "Test@1234",
+      "email": "lockeduser@example.com",
+      "status": "locked",
+      "lock_reason": "5_failed_attempts"
+    },
+    {
+      "role": "admin_user",
+      "username": "admin",
+      "password": "Admin@1234",
+      "email": "admin@example.com",
+      "status": "active",
+      "permissions": ["all"]
+    }
+  ]
+}
