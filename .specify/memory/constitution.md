@@ -129,12 +129,9 @@ E2E 测试验证完整的用户旅程与跨前后端的业务场景。
      ├── e2e/                                  # Playwright 端到端测试（扁平结构，不按特性分目录）
      │   ├── auth.spec.ts                      # 登录/注册端到端流程
      │   ├── user-management.spec.ts           # 用户管理核心场景
-     │   ├── pages/                            # Page Object 模式封装
-     │   │   ├── login.page.ts                 # 登录页：元素定位 + 操作封装
-     │   │   └── dashboard.page.ts             # 控制台页：元素定位 + 操作封装
-     │   └── test-ids/                         # data-testid 常量映射表
-     │       ├── login-test-ids.ts             # 登录流程 TestId 定义
-     │       └── dashboard-test-ids.ts         # 控制台 TestId 定义
+     │   └── pages/                            # Page Object 模式封装
+     │       ├── login.page.ts                 # 登录页：元素定位 + 操作封装
+     │       └── dashboard.page.ts             # 控制台页：元素定位 + 操作封装
      │
      ├── pytest.ini                                # pytest 配置
      ├── vitest.config.ts                          # Vitest 配置
@@ -162,7 +159,6 @@ E2E 测试验证完整的用户旅程与跨前后端的业务场景。
 - **前端 Vitest 文件**：`<ComponentName>.test.tsx`，PascalCase 组件名 + `.test.tsx`
 - **E2E 测试文件**：`<feature>.spec.ts`，kebab-case 功能名，如 `auth-flow.spec.ts`
 - **Page Object 文件**：`<page-name>.page.ts`，如 `login.page.ts`
-- **TestId 映射文件**：`<page-name>-test-ids.ts`，如 `login-test-ids.ts`
 
 ### 五、前端测试与 data-testid 定位强制规范
 
@@ -184,35 +180,7 @@ E2E 测试验证完整的用户旅程与跨前后端的业务场景。
 - Ant Design 内部 class 名（如 `.ant-modal-body`）
 - DOM 层级路径（如 `div > div > button`）
 
-#### 5.2 测试用例与 data-testid 映射
-
-每个核心 UI 流程（登录、注册、主机管理等）须建立独立的 **测试标识映射表**，放置于 `tests/e2e/test-ids/` 目录：
-
-```typescript
-// 示例：tests/e2e/test-ids/login-test-ids.ts
-export const LoginTestIds = {
-  // 表单元素
-  usernameInput: 'username-input',
-  passwordInput: 'password-input',
-  loginButton: 'login-button',
-  registerLink: 'register-link',
-  // 验证状态
-  usernameError: 'username-error',
-  passwordError: 'password-error',
-  loadingSpinner: 'login-loading',
-  // 结果状态
-  successToast: 'login-success',
-  failureToast: 'login-failure',
-} as const;
-```
-
-**要求**：
-- 每个 Page Object 或组件测试须导入对应的 TestId 常量对象
-- TestId 常量对象的键名使用 PascalCase，值严格对应 JSX 中 `data-testid` 属性值（kebab-case）
-- 新增 `data-testid` 时，须同步更新对应 TestId 常量对象
-- E2E Page Object 中所有 `getByTestId()` / `locator()` 调用必须引用 TestId 常量，禁止硬编码字符串
-
-#### 5.3 前端测试覆盖要求
+#### 5.2 前端测试覆盖要求
 
 | 测试类型 | 覆盖范围 | 最低要求 |
 |---|---|---|
