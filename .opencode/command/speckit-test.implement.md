@@ -53,8 +53,8 @@ $ARGUMENTS
    - **如果存在**：读取 `data-model.md` 获取实体数据结构和关系
    - **如果存在**：读取 `contracts/` 获取 API 定义
    - **如果存在**：读取 `data-testid.md` 获取页面可交互组件 `data-testid` 标识
-   - **如果存在**：读取 `.specify/memory/constitution.md` 获取治理约束
-   - **如果存在**：读取 `quickstart.md` 提取测试环境地址、数据库连接等信息
+   - **如果存在**：读取 `.specify/memory/constitution.md` 获取制品信息与部署要求，以及治理约束
+   - **如果存在**：读取 `quickstart.md` 获取测试环启动流程
 
 4. 解析 `tasks.md` 结构并提取：
    - **任务阶段**：阶段1：测试用例编写 → 阶段2：测试自动化代码编写 → 阶段3：测试环境准备 → 阶段4：测试执行

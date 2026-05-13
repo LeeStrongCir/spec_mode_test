@@ -50,7 +50,6 @@
 
 **集成测试约束**：
 - 后端 SQLite 使用内存模式：`sqlite:///file::memory:?cache=shared` 或 `sqlite:///:memory:`，每次测试通过 pytest fixture 重建 schema
-- 后端集成测试使用 `app.dependency_overrides[get_session] = override` 替换生产数据库
 - 后端外部调用须使用 `pytest-mock` 隔离，禁止修改被测源码
 - 前端 MSW handler 定义于 `tests/integration/frontend/mocks/handlers.ts`，按模块分组（auth/user/instance 等）
 - 前端集成测试覆盖组件交互流程与状态流转，使用 MSW 拦截 API 请求
@@ -83,77 +82,87 @@ E2E 测试验证完整的用户旅程与跨前后端的业务场景。
 
 ### 四、测试结构与目录规范
 
-本项目采用**统一 `tests/` 根目录**组织全部测试产物，按测试类型集中管理：
+本项目采用**统一 `leecloud_platform_tests/` 根目录**组织全部测试产物，按测试类型集中管理：
 
-1. **集成测试** —— `tests/integration/` 下按前后端分组，共享基础设施
-2. **端到端测试** —— `tests/e2e/` 验证完整系统行为
+1. **测试用例** —— `leecloud_platform_tests/test-cases/{NNN-feature}/` 存放从规格派生的手工文本用例
+2. **集成测试** —— `leecloud_platform_tests/integration/` 下按技术层分组（不按特性分割），共享基础设施
+3. **端到端测试** —— `leecloud_platform_tests/e2e/` 扁平结构验证完整系统行为，文件级按特性命名
 
 ```
-leecloud_platform/
-│
-├── tests/
-│   ├── integration/                          # 集成测试集中目录
-│   │   ├── backend/                          # 后端集成测试
-│   │   │   ├── conftest.py                   # 全局 fixture：app 实例、httpx client、内存 DB
-│   │   │   ├── test_api/                     # API 层集成测试，按路由模块分组
-│   │   │   │   ├── __init__.py
-│   │   │   │   └── test_auth.py              # 认证路由契约：请求→service→model→响应
-│   │   │   ├── test_services/                # service 层集成（含 DB 交互）
-│   │   │   │   ├── __init__.py
-│   │   │   │   └── test_user_service.py
-│   │   │   └── test_schemas/                 # schema 校验测试（边界值、等价类）
-│   │   │       ├── __init__.py
-│   │   │       └── test_user_schemas.py
-│   │   └── frontend/                         # 前端集成测试
-│   │       ├── setup.ts                      # Vitest 全局 setup（Testing Library 扩展）
-│   │       ├── test-utils.tsx                # 自定义 render（ConfigProvider 包裹）
-│   │       ├── mocks/
-│   │       │   ├── handlers.ts               # MSW request handlers（按模块分组）
-│   │       │   ├── server.ts                 # MSW Node setup（Vitest 用）
-│   │       │   └── browser.ts                # MSW browser setup（E2E 用）
-│   │       ├── components/                   # 组件集成测试（交互与状态流转）
-│   │       │   └── LoginPanel.test.tsx       # 登录面板：输入→提交→状态反馈
-│   │       ├── hooks/                        # hook 集成测试（状态流转）
-│   │       │   └── useAuth.test.ts           # 认证 hook：登录/登出状态流转
-│   │       └── services/                     # API service 集成测试（MSW + 请求构造与响应处理）
-│   │           └── api.test.ts               # Axios 请求函数：请求参数构造与响应解析
-│   └── e2e/                                  # Playwright 端到端测试
-│       ├── auth.spec.ts                      # 登录/注册端到端流程
-│       ├── user-management.spec.ts           # 用户管理核心场景
-│       ├── pages/                            # Page Object 模式封装
-│       │   ├── login.page.ts                 # 登录页：元素定位 + 操作封装
-│       │   └── dashboard.page.ts             # 控制台页：元素定位 + 操作封装
-│       └── test-ids/                         # data-testid 常量映射表
-│           ├── login-test-ids.ts             # 登录流程 TestId 定义
-│           └── dashboard-test-ids.ts         # 控制台 TestId 定义
-│
-├── pytest.ini                                # pytest 配置
-├── vitest.config.ts                          # Vitest 配置
-└── playwright.config.ts                      # Playwright E2E 配置
+./ (仓库根目录)
+└── leecloud_platform_tests/
+     ├── test-cases/                           # 手工/文本测试用例（从 spec.md TC-xxx 派生）
+     │   ├── 001-auth/                         # 特性 001：认证，与 specs/001-auth/ 对应
+     │   │   ├── TC-001-login-valid.md         # 正常凭证登录
+     │   │   ├── TC-002-login-invalid.md       # 无效凭证登录（负向）
+     │   │   └── TC-API-001-auth-contract.md   # 认证 API 契约验证
+     │   └── 002-user-mgmt/                    # 特性 002：用户管理，与 specs/002-user-mgmt/ 对应
+     │       ├── TC-001-create-user.md
+     │       ├── TC-002-delete-user.md
+     │       └── EC-001-concurrent-deletion.md # 边界/异常场景
+     │
+     ├── integration/                          # 集成测试集中目录（按技术层，不按特性）
+     │   ├── backend/                          # 后端集成测试
+     │   │   ├── conftest.py                   # 全局 fixture：app 实例、httpx client、内存 DB
+     │   │   ├── test_api/                     # API 层集成测试，按路由模块分组
+     │   │   │   ├── __init__.py
+     │   │   │   └── test_auth.py              # 认证路由契约：请求→service→model→响应
+     │   │   ├── test_services/                # service 层集成（含 DB 交互）
+     │   │   │   ├── __init__.py
+     │   │   │   └── test_user_service.py
+     │   │   └── test_schemas/                 # schema 校验测试（边界值、等价类）
+     │   │       ├── __init__.py
+     │   │       └── test_user_schemas.py
+     │   └── frontend/                         # 前端集成测试
+     │       ├── setup.ts                      # Vitest 全局 setup（Testing Library 扩展）
+     │       ├── test-utils.tsx                # 自定义 render（ConfigProvider 包裹）
+     │       ├── mocks/
+     │       │   ├── handlers.ts               # MSW request handlers（按模块分组）
+     │       │   ├── server.ts                 # MSW Node setup（Vitest 用）
+     │       │   └── browser.ts                # MSW browser setup（E2E 用）
+     │       ├── components/                   # 组件集成测试（交互与状态流转）
+     │       │   └── LoginPanel.test.tsx       # 登录面板：输入→提交→状态反馈
+     │       ├── hooks/                        # hook 集成测试（状态流转）
+     │       │   └── useAuth.test.ts           # 认证 hook：登录/登出状态流转
+     │       └── services/                     # API service 集成测试（MSW + 请求构造与响应处理）
+     │           └── api.test.ts               # Axios 请求函数：请求参数构造与响应解析
+     ├── e2e/                                  # Playwright 端到端测试（扁平结构，不按特性分目录）
+     │   ├── auth.spec.ts                      # 登录/注册端到端流程
+     │   ├── user-management.spec.ts           # 用户管理核心场景
+     │   ├── pages/                            # Page Object 模式封装
+     │   │   ├── login.page.ts                 # 登录页：元素定位 + 操作封装
+     │   │   └── dashboard.page.ts             # 控制台页：元素定位 + 操作封装
+     │   └── test-ids/                         # data-testid 常量映射表
+     │       ├── login-test-ids.ts             # 登录流程 TestId 定义
+     │       └── dashboard-test-ids.ts         # 控制台 TestId 定义
+     │
+     ├── pytest.ini                                # pytest 配置
+     ├── vitest.config.ts                          # Vitest 配置
+     └── playwright.config.ts                      # Playwright E2E 配置
 ```
 
 **目录设计原则**：
 
 | 层级 | 放置位置 | 适用测试类型 | 设计理由 |
 |---|---|---|---|
-| **集成层** | `tests/integration/backend/` | API 集成、service 集成、schema 校验 | pytest conftest 统一 fixture，按模块分组 |
-| | `tests/integration/frontend/` | 组件集成、hook 集成、API service 集成 | MSW mocks、Vitest setup 集中管理，测试文件按类型分组 |
-| **E2E 层** | `tests/e2e/` | Playwright E2E | 独立于前后端生命周期，需要同时启动前端和后端服务 |
+| **测试用例层** | `leecloud_platform_tests/test-cases/{NNN-feature}/` | 手工文本用例（TC-xxx / EC-xxx） | 与 `specs/{NNN-feature}/` 一一对应，特性级管理、独立评审、可追溯 |
+| **集成层** | `leecloud_platform_tests/integration/backend/` | API 集成、service 集成、schema 校验 | pytest conftest 统一 fixture，按技术层分组保持内聚性 |
+| | `leecloud_platform_tests/integration/frontend/` | 组件集成、hook 集成、API service 集成 | MSW mocks、Vitest setup 集中管理，测试文件按类型分组 |
+| **E2E 层** | `leecloud_platform_tests/e2e/` | Playwright E2E | 独立于前后端生命周期，数量控制在 10-20 条，扁平结构足够清晰 |
+
+**追溯规则**：
+- 文本用例通过目录与 specs 镜像对应（`leecloud_platform_tests/test-cases/001-auth/TC-001-*.md` ↔ `specs/001-auth/spec.md#TC-001`），正向 ↔ 负向在文件内以 `Related:` 字段标注
+- 自动化代码通过文件头部注释追溯至 TC 编号及 spec.md，如 `# Spec: specs/001-auth/spec.md → TC-001, TC-002`；pytest 可配合 `@pytest.mark.feature("auth")` 按特性筛选
+- E2E 通过文件名与 TC 编号对应（`auth.spec.ts` ↔ `specs/001-auth/spec.md`）
 
 **测试文件命名约定**：
+- **文本用例文件**：`TC-{序号}-{简述}.md`（如 `TC-001-login-valid.md`）、`EC-{序号}-{简述}.md`（如 `EC-001-concurrent-deletion.md`），目录名 `{NNN-feature}` 与 `specs/` 下特性目录编号一致
 - **后端 pytest 文件**：`test_<module>.py`，snake_case，如 `test_auth.py`
 - **后端 pytest 测试函数**：`test_<功能描述>`，snake_case，如 `test_login_valid_credentials_returns_200`
 - **前端 Vitest 文件**：`<ComponentName>.test.tsx`，PascalCase 组件名 + `.test.tsx`
 - **E2E 测试文件**：`<feature>.spec.ts`，kebab-case 功能名，如 `auth-flow.spec.ts`
 - **Page Object 文件**：`<page-name>.page.ts`，如 `login.page.ts`
 - **TestId 映射文件**：`<page-name>-test-ids.ts`，如 `login-test-ids.ts`
-
-**配置文件分布**：
-- `pytest.ini` → 项目根目录，后端测试统一入口
-- `tests/integration/backend/conftest.py` → 后端共享 fixture（DB、app 实例）
-- `vitest.config.ts` → 项目根目录，前端测试统一入口
-- `playwright.config.ts` → 项目根目录，配置 `webServer` 同时启动前后端
-- CI 脚本 `.github/workflows/test.yml` 或 `Makefile` 统一定义 `make test`、`make test:e2e` 入口
 
 ### 五、前端测试与 data-testid 定位强制规范
 
@@ -214,6 +223,24 @@ export const LoginTestIds = {
 | **表单验证** | 登录、注册等表单的验证状态反馈 | 每个必填字段至少覆盖：空值、无效格式、有效值 |
 | **异步状态** | Loading、Success、Error 三态展示 | 每个异步操作必须覆盖三态转换 |
 
+## 项目制品信息与部署要求
+
+**制品信息(代码仓地址)**：`https://github.com/LeeStrongCir/spec_mode_dev.git`
+
+**部署操作步骤**：
+
+```bash
+# 务必克隆到 WSL 原生文件系统（/mnt/c/ 路径构建极慢）
+cd /tmp
+git clone https://github.com/LeeStrongCir/spec_mode_dev.git
+
+ls /tmp/spec_mode_dev/
+# 能看到 leecloud_platform/ 目录
+```
+
+**部署约束**：
+- 项目制品必须克隆至 WSL 原生 Linux 文件系统（如 `/tmp`），禁止使用 `/mnt/c/` 等 Windows 挂载路径，否则构建速度极慢
+
 ## 治理
 
 本章程为项目最高级别的测试规范，所有测试制品提交与审查必须遵循。任何修改须经团队评审。
@@ -226,8 +253,8 @@ export const LoginTestIds = {
 
 **技术栈约束**：严格使用本宪章定义的工具，按集成/E2E 领域选型，不得擅自引入替代方案。
 
-**目录规范**：所有测试产物置于统一 `tests/` 根目录下，按集成/E2E 分组存放。
+**目录规范**：所有测试产物置于统一 `leecloud_platform_tests/` 根目录下。文本用例按特性分组存放于 `leecloud_platform_tests/test-cases/{NNN-feature}/`，与 `specs/` 结构镜像对应；集成测试按技术层分组存放于 `leecloud_platform_tests/integration/`，保持 conftest fixture 共享；E2E 测试以扁平结构存放于 `leecloud_platform_tests/e2e/`，文件级按特性命名。
 
 **前端定位规范**：前端集成测试与 E2E 测试须优先使用 `getByTestId` 定位元素，禁止依赖 Ant Design 内部 class 或 DOM 结构。
 
-**版本**：4.0.0 | **生效日期**：2026-05-13 | **最后修订**：2026-05-13
+**版本**：4.1.0 | **生效日期**：2026-05-13 | **最后修订**：2026-05-13
